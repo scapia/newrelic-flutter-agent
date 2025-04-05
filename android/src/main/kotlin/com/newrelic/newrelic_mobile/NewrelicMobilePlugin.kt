@@ -9,12 +9,10 @@ import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.NonNull
 import com.newrelic.agent.android.ApplicationFramework
 import com.newrelic.agent.android.FeatureFlag
 import com.newrelic.agent.android.HttpHeaders
 import com.newrelic.agent.android.NewRelic
-import com.newrelic.agent.android.logging.AgentLog
 import com.newrelic.agent.android.logging.LogLevel
 import com.newrelic.agent.android.metric.MetricUnit
 import com.newrelic.agent.android.stats.StatsEngine
@@ -35,13 +33,13 @@ class NewrelicMobilePlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
     private lateinit var context: Context
 
-    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "newrelic_mobile")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
     }
 
-    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) =
+    override fun onMethodCall(call: MethodCall, result: Result) =
         when (call.method) {
             "getPlatformVersion" -> {
                 result.success("Android ${Build.VERSION.RELEASE}")
@@ -382,7 +380,8 @@ class NewrelicMobilePlugin : FlutterPlugin, MethodCallHandler {
 
 
                 value?.let {
-                    NewRelic.recordMetric(name, category,
+                    NewRelic.recordMetric(
+                        name, category,
                         1, it, 0.0,
                         countUnit?.let { it2 -> MetricUnit.valueOf(it2) },
                         valueUnit?.let { it3 -> MetricUnit.valueOf(it3) })
@@ -408,11 +407,13 @@ class NewrelicMobilePlugin : FlutterPlugin, MethodCallHandler {
             "getHTTPHeadersTrackingFor" -> {
                 result.success(HttpHeaders.getInstance().httpHeaders.toList())
             }
+
             "logAttributes" -> {
                 val attributes: HashMap<String, Any>? = call.argument("attributes")
                 NewRelic.logAttributes(attributes)
                 result.success("Recorded Log")
             }
+
             "crashNow" -> {
                 val name: String? = call.argument("name")
                 Looper.myLooper()?.let {
@@ -452,7 +453,7 @@ class NewrelicMobilePlugin : FlutterPlugin, MethodCallHandler {
     }
 
 
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
     }
 }
