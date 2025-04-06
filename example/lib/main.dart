@@ -35,15 +35,6 @@ const String readCounters = """
 void main() {
   var appToken = "";
 
-  var newRelicAndroidKey = "eu01xx3e11ebbd0cd299e7613a7d10041569dc40c3-NRMA";
-  var newRelicIosKey = "eu01xx281c38edcb980fe092e539468644a64a5721-NRMA";
-
-  if (Platform.isAndroid) {
-    appToken = newRelicAndroidKey;
-  } else if (Platform.isIOS) {
-    appToken = newRelicIosKey;
-  }
-
   Config config = Config(
       accessToken: appToken,
       analyticsEventEnabled: true,
