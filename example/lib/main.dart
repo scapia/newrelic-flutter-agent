@@ -17,7 +17,6 @@ import 'package:newrelic_mobile/config.dart';
 import 'package:newrelic_mobile/network_failure.dart';
 import 'package:newrelic_mobile/newrelic_mobile.dart';
 import 'package:newrelic_mobile/newrelic_navigation_observer.dart';
-import 'package:newrelic_mobile_example/app_config.dart';
 import 'package:http/http.dart' as http;
 
 const String readCounters = """
@@ -36,10 +35,13 @@ const String readCounters = """
 void main() {
   var appToken = "";
 
+  var newRelicAndroidKey = "eu01xx3e11ebbd0cd299e7613a7d10041569dc40c3-NRMA";
+  var newRelicIosKey = "eu01xx281c38edcb980fe092e539468644a64a5721-NRMA";
+
   if (Platform.isAndroid) {
-    appToken = AppConfig.androidToken;
+    appToken = newRelicAndroidKey;
   } else if (Platform.isIOS) {
-    appToken = AppConfig.iOSToken;
+    appToken = newRelicIosKey;
   }
 
   Config config = Config(
@@ -110,16 +112,12 @@ class Page1Screen extends StatelessWidget {
                 ElevatedButton(
                     onPressed: () async {
                       debugPrint(null);
-                      NewrelicMobile.instance
-                          .recordBreadcrumb("Button Got Pressed on Screen 3");
+                      NewrelicMobile.instance.recordBreadcrumb("Button Got Pressed on Screen 3");
                       NewrelicMobile.instance.logInfo("testing logs");
                       NewrelicMobile.instance.logDebug("testing logs debug");
-                      NewrelicMobile.instance
-                          .logWarning("testing logs warning");
-                      NewrelicMobile.instance
-                          .logVerbose("testing logs verbose");
-                      NewrelicMobile.instance
-                          .log(LogLevel.ERROR, "testing logs");
+                      NewrelicMobile.instance.logWarning("testing logs warning");
+                      NewrelicMobile.instance.logVerbose("testing logs verbose");
+                      NewrelicMobile.instance.log(LogLevel.ERROR, "testing logs");
                       NewrelicMobile.instance.logInfo("testing logs");
                       NewrelicMobile.instance.logInfo("testing logs");
 
@@ -131,11 +129,9 @@ class Page1Screen extends StatelessWidget {
                       map["logLevel"] = "INFO";
                       map["message"] = "testing logs with attributes";
 
-                      NewrelicMobile.instance
-                          .logAttributes(map.cast<String, dynamic>());
+                      NewrelicMobile.instance.logAttributes(map.cast<String, dynamic>());
 
-                      NewrelicMobile.instance
-                          .logAll(Exception("This is an exception"), {
+                      NewrelicMobile.instance.logAll(Exception("This is an exception"), {
                         "BreadNumValue": 12.3,
                         "BreadStrValue": "FlutterBread",
                         "BreadBoolValue": true,
@@ -160,29 +156,20 @@ class Page1Screen extends StatelessWidget {
                       if (kDebugMode) {
                         print(NewrelicMobile.instance.currentSessionId());
                       }
-                      NewrelicMobile.instance.incrementAttribute(
-                          "FlutterCustomAttrNumber",
-                          value: 5.0);
+                      NewrelicMobile.instance.incrementAttribute("FlutterCustomAttrNumber", value: 5.0);
                       // NewrelicMobile.instance.recordMetric("testMetric", "Test Champ",value: 12.0);
-                      NewrelicMobile.instance.recordMetric(
-                          "testMetric1", "TestChamp12",
-                          value: 10,
-                          valueUnit: MetricUnit.BYTES,
-                          countUnit: MetricUnit.PERCENT);
+                      NewrelicMobile.instance
+                          .recordMetric("testMetric1", "TestChamp12", value: 10, valueUnit: MetricUnit.BYTES, countUnit: MetricUnit.PERCENT);
                     },
-                    child: const Text('Test New Static Methods',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('Test New Static Methods', maxLines: 1, textDirection: TextDirection.ltr)),
                 ElevatedButton(
                     onPressed: () async {
                       final client = HttpClient();
                       // Here can be any non-existing URL.
-                      final request = await client
-                          .postUrl(Uri.parse("https://localhost:8080"));
-                      request.headers.set(HttpHeaders.contentTypeHeader,
-                          "application/json; charset=UTF-8");
+                      final request = await client.postUrl(Uri.parse("https://localhost:8080"));
+                      request.headers.set(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
                       request.headers.set("ngrok-skip-browser-warning", 69420);
-                      request.write(
-                          '{"title": "Foo","body": "Bar", "userId": 99}');
+                      request.write('{"title": "Foo","body": "Bar", "userId": 99}');
 
                       final response = await request.close();
 
@@ -192,19 +179,15 @@ class Page1Screen extends StatelessWidget {
                         }
                       });
                     },
-                    child: const Text('Http call to non-existing URL',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('Http call to non-existing URL', maxLines: 1, textDirection: TextDirection.ltr)),
                 ElevatedButton(
                     onPressed: () async {
                       final client = HttpClient();
-                      final request = await client.postUrl(Uri.parse(
-                          "https://8f1d-2600-1006-b003-7627-ca1-491c-9b0-25ff.ngrok.io/notice_error"));
-                      request.headers.set(HttpHeaders.contentTypeHeader,
-                          "application/json; charset=UTF-8");
+                      final request = await client.postUrl(Uri.parse("https://8f1d-2600-1006-b003-7627-ca1-491c-9b0-25ff.ngrok.io/notice_error"));
+                      request.headers.set(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
                       request.headers.set("Car", "Honda");
                       request.headers.set("ngrok-skip-browser-warning", 69420);
-                      request.write(
-                          '{"title": "Foo","body": "Bar", "userId": 99}');
+                      request.write('{"title": "Foo","body": "Bar", "userId": 99}');
 
                       final response = await request.close();
 
@@ -214,14 +197,12 @@ class Page1Screen extends StatelessWidget {
                         }
                       });
                     },
-                    child: const Text('Http Default Client',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('Http Default Client', maxLines: 1, textDirection: TextDirection.ltr)),
                 ElevatedButton(
                     onPressed: () async {
                       // final client = HttpClient();
                       // var uri = Uri.parse("https://reactnative.dev/movies.json");
-                      var response = await http.get(
-                          Uri.parse("https://reactnative.dev/movies.json"));
+                      var response = await http.get(Uri.parse("https://reactnative.dev/movies.json"));
                       // request.followRedirects = false;
 
                       // var url = Uri.parse(
@@ -232,16 +213,14 @@ class Page1Screen extends StatelessWidget {
                         print('Response body: ${response.statusCode}');
                       }
                     },
-                    child: const Text('Http Library ',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('Http Library ', maxLines: 1, textDirection: TextDirection.ltr)),
                 ElevatedButton(
                     onPressed: () async {
                       try {
                         var dio = Dio();
                         dio.options.headers['Car'] = 'Toyota';
                         dio.options.followRedirects = false;
-                        var response =
-                            await dio.get('http://graph.facebook.com/');
+                        var response = await dio.get('http://graph.facebook.com/');
                         if (kDebugMode) {
                           print(response);
                         }
@@ -251,14 +230,12 @@ class Page1Screen extends StatelessWidget {
                         }
                       }
                     },
-                    child: const Text('Http Dio Library ',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('Http Dio Library ', maxLines: 1, textDirection: TextDirection.ltr)),
                 ElevatedButton(
                     onPressed: () async {
                       try {
                         var dio = Dio();
-                        var response = await dio
-                            .get('https://reactnative.dev/movies.json');
+                        var response = await dio.get('https://reactnative.dev/movies.json');
                         if (kDebugMode) {
                           print(response);
                         }
@@ -268,26 +245,18 @@ class Page1Screen extends StatelessWidget {
                         }
                       }
                     },
-                    child: const Text('OOM Issue Library ',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('OOM Issue Library ', maxLines: 1, textDirection: TextDirection.ltr)),
                 ElevatedButton(
                     onPressed: () async {
                       NewrelicMobile.instance.noticeNetworkFailure(
-                          "https://cb6b02be-a319-4de5-a3b1-361de2564493.mock.pstmn.io/searchpage",
-                          "GET",
-                          1000,
-                          2000,
-                          NetworkFailure.dnsLookupFailed);
+                          "https://cb6b02be-a319-4de5-a3b1-361de2564493.mock.pstmn.io/searchpage", "GET", 1000, 2000, NetworkFailure.dnsLookupFailed);
                     },
-                    child: const Text('NetWork Failure',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('NetWork Failure', maxLines: 1, textDirection: TextDirection.ltr)),
                 ElevatedButton(
                     onPressed: () async {
                       try {
                         var dio = Dio();
-                        var response = await dio.post(
-                            'https://reqres.in/api/register',
-                            data: "{ 'email': 'sydney@fife'}");
+                        var response = await dio.post('https://reqres.in/api/register', data: "{ 'email': 'sydney@fife'}");
                         if (kDebugMode) {
                           print(response.data);
                         }
@@ -297,8 +266,7 @@ class Page1Screen extends StatelessWidget {
                         }
                       }
                     },
-                    child: const Text('Http Dio Post Library ',
-                        maxLines: 1, textDirection: TextDirection.ltr)),
+                    child: const Text('Http Dio Post Library ', maxLines: 1, textDirection: TextDirection.ltr)),
                 Query(
                     options: QueryOptions(document: gql(readCounters)),
                     builder: (result, {fetchMore, refetch}) {
@@ -316,11 +284,9 @@ class Page1Screen extends StatelessWidget {
                 Image.network('https://picsum.photos/250?image=9'),
                 ElevatedButton(
                   onPressed: () async {
-                    var id = await NewrelicMobile.instance
-                        .startInteraction("Going to Page 2");
+                    var id = await NewrelicMobile.instance.startInteraction("Going to Page 2");
                     Future.delayed(const Duration(milliseconds: 100), () {
-                      Navigator.pushNamed(context, 'pagetwo',
-                          arguments: {'id': id});
+                      Navigator.pushNamed(context, 'pagetwo', arguments: {'id': id});
                     });
                   },
                   child: const Text('Go to page 2'),
@@ -404,12 +370,8 @@ class Page2Screen extends StatelessWidget {
     try {
       throw bar['name'];
     } catch (error) {
-      Map<String, dynamic> attributes = {
-        "error attribute": "12344",
-        "error test attribute": 1234
-      };
-      NewrelicMobile.instance
-          .recordError(error, StackTrace.current, attributes: attributes);
+      Map<String, dynamic> attributes = {"error attribute": "12344", "error test attribute": 1234};
+      NewrelicMobile.instance.recordError(error, StackTrace.current, attributes: attributes);
     }
   }
 
@@ -434,31 +396,22 @@ class Page3Screen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   for (var i = 0; i < 100; i++) {
-                    NewrelicMobile.instance.recordCustomEvent(
-                        "Test Custom Event",
-                        eventName: "User Purchase",
-                        eventAttributes: {
-                          "item1": "Clothes",
-                          "price": 34.00,
-                          "loop test": i
-                        });
+                    NewrelicMobile.instance.recordCustomEvent("Test Custom Event",
+                        eventName: "User Purchase", eventAttributes: {"item1": "Clothes", "price": 34.00, "loop test": i});
                   }
                 },
                 child: const Text('Record Custom Event'),
               ),
               ElevatedButton(
-                onPressed: () => NewrelicMobile.instance
-                    .recordBreadcrumb("Button Got Pressed on Screen 3"),
+                onPressed: () => NewrelicMobile.instance.recordBreadcrumb("Button Got Pressed on Screen 3"),
                 child: const Text('Record BreadCrumb Event'),
               ),
               ElevatedButton(
                 onPressed: () async {
-                  var id = await NewrelicMobile.instance
-                      .startInteraction("Getting Data from Service");
+                  var id = await NewrelicMobile.instance.startInteraction("Getting Data from Service");
                   try {
                     var dio = Dio();
-                    var response =
-                        await dio.get('https://reqres.in/api/users?delay=15');
+                    var response = await dio.get('https://reqres.in/api/users?delay=15');
                     if (kDebugMode) {
                       print(response);
                     }
@@ -472,8 +425,7 @@ class Page3Screen extends StatelessWidget {
                 child: const Text('Interaction Example'),
               ),
               ElevatedButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, 'pagefour'),
+                onPressed: () => Navigator.pushReplacementNamed(context, 'pagefour'),
                 child: const Text('Go to Isolate page'),
               ),
             ],
@@ -514,11 +466,9 @@ class _Page4ScreenState extends State<Page4Screen> {
                     if (kDebugMode) {
                       print('Error: $message');
                     }
-                    NewrelicMobile.instance
-                        .recordError(message, StackTrace.current);
+                    NewrelicMobile.instance.recordError(message, StackTrace.current);
                   });
-                  await Isolate.spawn(_isolateFunction, port.sendPort,
-                      onError: errorPort.sendPort);
+                  await Isolate.spawn(_isolateFunction, port.sendPort, onError: errorPort.sendPort);
 
                   // computeService.fetchUser().then((value) {
                   //   setState(() {
@@ -572,16 +522,14 @@ class Person {
 }
 
 class Api {
-  static Future<String> getUser(String from) =>
-      Future.value("{\"name\":\"John Smith ..via $from\"}");
+  static Future<String> getUser(String from) => Future.value("{\"name\":\"John Smith ..via $from\"}");
 }
 
 class SpawnService {
   Future<Person?> fetchUser() async {
     ReceivePort port = ReceivePort();
     String userData = await Api.getUser("Spawn");
-    var isolate = await Isolate.spawn<List<dynamic>>(
-        deserializePerson, [port.sendPort, userData]);
+    var isolate = await Isolate.spawn<List<dynamic>>(deserializePerson, [port.sendPort, userData]);
     isolate.addErrorListener(port.sendPort);
     return await port.first;
   }
@@ -646,8 +594,7 @@ class PopPopPop extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, 'pagetwo',
-                      arguments: {'id': ""});
+                  Navigator.pushNamed(context, 'pagetwo', arguments: {'id': ""});
                 },
                 child: const Text('OK'),
               ),
