@@ -1,3 +1,12 @@
+### 1.2.2+scapia.1
+
+Scapia fork. Adds per-request opt-out via the `x-newrelic-skip` header
+(see `NewRelicHttpClientRequest.skipHeader`). When the header is set on
+an outgoing request, the agent skips `noticeHttpTransaction` for that
+call and strips the header before dispatch. Use for high-frequency Dart
+HTTP (image loading, polling) where the app already records analytics
+via custom events.
+
 ### 1.2.2
 
 ## Enhancements

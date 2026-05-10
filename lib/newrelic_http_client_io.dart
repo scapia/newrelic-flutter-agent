@@ -248,17 +248,35 @@ Future<NewRelicHttpClientResponse> _wrapResponse(
 }
 
 class NewRelicHttpClientRequest extends HttpClientRequest {
+  /// Scapia patch: per-request opt-out header.
+  ///
+  /// Setting this header on an HttpClientRequest before close() makes
+  /// the agent skip noticeHttpTransaction for this call. The header is
+  /// stripped before the request is actually dispatched, so backends/
+  /// CDNs never see it.
+  ///
+  /// Example:
+  ///   final res = await http.get(url, headers: {
+  ///     NewRelicHttpClientRequest.skipHeader: '1',
+  ///   });
+  static const String skipHeader = 'x-newrelic-skip';
+
   final int timestamp;
   final HttpClientRequest _httpClientRequest;
   StringBuffer? _sendBuffer = StringBuffer();
   Map<String, dynamic> traceData;
   Map<String, dynamic>? params;
+  // Scapia patch: set in close() after inspecting headers.
+  bool _skipNr = false;
 
   NewRelicHttpClientRequest(
       this._httpClientRequest, this.timestamp, this.traceData,
       [this.params]) {
     var request = this;
     request.done.then((value) {
+      // Scapia patch: bypass response wrap (and noticeHttpTransaction)
+      // when this request was marked skip in close().
+      if (request._skipNr) return value;
       var response = _wrapResponse(
         value,
         request,
@@ -325,6 +343,14 @@ class NewRelicHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() {
+    // Scapia patch: per-request opt-out via skipHeader. If set, strip the
+    // header so it never reaches the wire, mark the request, and return
+    // the underlying response unwrapped — no noticeHttpTransaction fires.
+    if (headers.value(skipHeader) != null) {
+      _skipNr = true;
+      headers.removeAll(skipHeader);
+      return _httpClientRequest.close();
+    }
     return _httpClientRequest.close().then(
         (response) => _wrapResponse(
             response, _httpClientRequest, this.timestamp, traceData),
@@ -342,6 +368,10 @@ class NewRelicHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> get done {
+    // Scapia patch: honour skipHeader set in close(). Without this gate,
+    // even when close() bypassed the wrap, callers awaiting `.done` would
+    // still trigger _wrapResponse and re-fire noticeHttpTransaction.
+    if (_skipNr) return _httpClientRequest.done;
     return _httpClientRequest.done.then(
         (response) =>
             _wrapResponse(response, _httpClientRequest, timestamp, traceData),
