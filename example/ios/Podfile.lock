@@ -1,0 +1,46 @@
+PODS:
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - ReachabilitySwift
+  - Flutter (1.0.0)
+  - newrelic_mobile (1.1.17):
+    - Flutter
+    - NewRelicAgent (~> 7.6.0)
+  - NewRelicAgent (7.6.0)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - ReachabilitySwift (5.2.4)
+
+DEPENDENCIES:
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
+  - Flutter (from `Flutter`)
+  - newrelic_mobile (from `.symlinks/plugins/newrelic_mobile/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs:
+    - NewRelicAgent
+    - ReachabilitySwift
+
+EXTERNAL SOURCES:
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
+  Flutter:
+    :path: Flutter
+  newrelic_mobile:
+    :path: ".symlinks/plugins/newrelic_mobile/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+
+SPEC CHECKSUMS:
+  connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  newrelic_mobile: f7a0d30497926e0118d056cf743024619a28547e
+  NewRelicAgent: 96b6033df5e4c9aed0ffe7254430ba544edc216c
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
+
+PODFILE CHECKSUM: b77ca6ed4283d5b0eb6704baf2c7c0f1f1d9f66d
+
+COCOAPODS: 1.16.2
