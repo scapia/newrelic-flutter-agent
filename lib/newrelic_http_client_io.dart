@@ -17,6 +17,52 @@ class NewRelicHttpClient implements HttpClient {
 
   NewRelicHttpClient({HttpClient? client}) : client = client ?? HttpClient();
 
+  // ─── Scapia patch: discovery logging + host blacklist ────────────────
+  //
+  // Configure these statics at app startup, BEFORE NewrelicMobile.startAgent
+  // installs the global HttpOverrides. Values are read on every openUrl.
+  //
+  //   scapiaLogFirstCallPerHost
+  //     When true, the first dart-http call to each unique host is printed
+  //     once via `print('[newrelic-scapia] <method> <host> (<path>)')`.
+  //     Use during discovery to identify which third-party SDKs route their
+  //     HTTP through the Dart isolate vs. native (OkHttp/NSURLSession).
+  //
+  //   scapiaBlacklistedHosts
+  //     Hosts whose dart-http calls fail with SocketException before hitting
+  //     the network. Match: lower-case exact OR `host.endsWith('.\$entry')`.
+  //     Use to disable specific SDKs whose Dart HTTP we don't want made.
+  //
+  // Note: only `openUrl` is gated. Convenience methods (getUrl, postUrl,
+  // etc.) are not — package:http and dio both go through openUrl, so this
+  // covers the common call path. If you have callers that hit the
+  // convenience methods directly, gate those too.
+  static bool scapiaLogFirstCallPerHost = false;
+  static Set<String> scapiaBlacklistedHosts = const <String>{};
+  static final Set<String> _scapiaSeenHosts = <String>{};
+
+  static bool _scapiaIsBlacklisted(String host) {
+    if (scapiaBlacklistedHosts.isEmpty) return false;
+    final h = host.toLowerCase();
+    for (final b in scapiaBlacklistedHosts) {
+      final bl = b.toLowerCase();
+      if (h == bl || h.endsWith('.$bl')) return true;
+    }
+    return false;
+  }
+
+  void _scapiaInterceptUrl(String method, Uri url) {
+    if (scapiaLogFirstCallPerHost) {
+      final host = url.host.toLowerCase();
+      if (host.isNotEmpty && _scapiaSeenHosts.add(host)) {
+        // ignore: avoid_print
+        print('[newrelic-scapia] dart-http first hit: $method $host '
+            '(path=${url.path.isEmpty ? "/" : url.path})');
+      }
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────
+
   @override
   set autoUncompress(bool au) => client.autoUncompress = au;
 
@@ -141,6 +187,14 @@ class NewRelicHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> openUrl(String method, Uri url) {
+    // Scapia patch: discovery logging + host blacklist gate.
+    _scapiaInterceptUrl(method, url);
+    if (_scapiaIsBlacklisted(url.host)) {
+      return Future.error(const SocketException(
+        'newrelic-scapia: blocked by HTTP blacklist',
+        osError: OSError('blacklisted by NewRelicHttpClient.scapiaBlacklistedHosts'),
+      ));
+    }
     return _wrapRequest(client.openUrl(method, url));
   }
 

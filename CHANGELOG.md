@@ -1,3 +1,20 @@
+### 1.2.2+scapia.2
+
+Adds host-level discovery logging + blacklist on `NewRelicHttpClient`.
+Configure via static fields BEFORE `NewrelicMobile.startAgent`:
+
+  - `NewRelicHttpClient.scapiaLogFirstCallPerHost` (bool) — prints
+    `[newrelic-scapia] <method> <host>` once per unique host. Use to
+    discover which SDKs route their HTTP through the Dart isolate.
+  - `NewRelicHttpClient.scapiaBlacklistedHosts` (Set<String>) — requests
+    to listed hosts (or any subdomain via `endsWith('.\$entry')`) fail
+    with `SocketException` before hitting the network. Use to disable
+    specific SDKs whose Dart HTTP we don't want made.
+
+Only `openUrl` is gated; convenience methods (getUrl/postUrl/etc.) are
+not. package:http and dio both call openUrl, so this covers the common
+case.
+
 ### 1.2.2+scapia.1
 
 Scapia fork. Adds per-request opt-out via the `x-newrelic-skip` header
