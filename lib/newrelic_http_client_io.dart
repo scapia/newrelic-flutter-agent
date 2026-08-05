@@ -9,6 +9,7 @@ import 'dart:io';
 
 import 'package:newrelic_mobile/config.dart';
 import 'package:newrelic_mobile/newrelic_dt_trace.dart';
+import 'package:newrelic_mobile/src/tracked_headers.dart';
 
 import 'newrelic_mobile.dart';
 
@@ -233,15 +234,11 @@ Future<NewRelicHttpClientResponse> _wrapResponse(
     return response;
   }
 
-  dynamic headersList =
-      await NewrelicMobile.instance.getHTTPHeadersTrackingFor();
-  Map<String, String> params = Map();
+  final List<String> headersList =
+      List<String>.from(await NewrelicMobile.instance.getHTTPHeadersTrackingFor());
 
-  for (String header in headersList) {
-    if (request.headers.value(header) != null) {
-      params.putIfAbsent(header, () => request.headers.value(header)!);
-    }
-  }
+  final params =
+      trackedHeaderParams(headersList, request.headers, response.headers);
 
   return NewRelicHttpClientResponse(response, request, timestamp, traceData,
       params: params);
