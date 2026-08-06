@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v2 # required!
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e  # v2  # required!
+        with:
+          persist-credentials: false
 
       - name: '>> Dart package <<'
-        uses: k-paxian/dart-package-publisher@master
+        uses: k-paxian/dart-package-publisher@8fdba1dbf624c712706281a6f91cb50b6bfc2eaf  # master
         with:
-          accessToken: ${{ secrets.PUB_OAUTH_ACCESS_TOKEN }}
-          refreshToken: ${{ secrets.PUB_OAUTH_REFRESH_TOKEN }}
+          accessToken: ${{ secrets.PUB_OAUTH_ACCESS_TOKEN }}  # zizmor: ignore[secrets-outside-env]
+          refreshToken: ${{ secrets.PUB_OAUTH_REFRESH_TOKEN }}  # zizmor: ignore[secrets-outside-env]
